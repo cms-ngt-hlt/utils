@@ -170,6 +170,11 @@ for keyPlot in config:
         hasFitGaus = option.find("fitGaus") > -1
         if hasFitGaus :
             option = option.replace("fitGaus","")
+
+        hasLogX = option.find("logX") > -1
+        if hasLogX :
+            option = option.replace("logX","")
+            pad.SetLogx()
             
         hasLogY = option.find("logY") > -1
         if hasLogY :
