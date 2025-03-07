@@ -1,0 +1,79 @@
+{
+    "Efficiency vs eta for hltPhase2PixelTracks": {
+        "comment": "Efficiency vs eta for hltPhase2PixelTracks",
+        "inputs": {
+            "1 realistic bs default": {
+                "label": "Default cuts - Realistic HL-LHC beamspot",
+                "legendEntry": "Default cuts - Realistic HL-LHC beamspot",
+                "filename": "/eos/user/l/lferragi/samples/doublets_studies/default/DQM_TTbar_realistic_beamspot.root",
+                "folder": "DQMData/Run 1/HLT/Run summary/Tracking/ValidationWRTtp/hltInitialStepTrackSelectionHighPurity_hltAssociatorByHits/",
+                "plot": "effic"
+            },
+            "3 realistic bs Agent 78": {
+                "label": "Agent 78 - Realistic HL-LHC beamspot",
+                "legendEntry": "Agent 78 - Realistic HL-LHC beamspot",
+                "filename": "/eos/user/l/lferragi/samples/doublets_studies/optimized/DQM_point_78_TTbar_realistic_beamspot.root",
+                "folder": "DQMData/Run 1/HLT/Run summary/Tracking/ValidationWRTtp/hltInitialStepTrackSelectionHighPurity_hltAssociatorByHits/",
+                "plot": "effic"
+            },            
+            "5 realistic bs Agent 87": {
+                "label": "Agent 87 - Realistic HL-LHC beamspot",
+                "legendEntry": "Agent 87 - Realistic HL-LHC beamspot",
+                "filename": "/eos/user/l/lferragi/samples/doublets_studies/optimized/DQM_point_87_TTbar_realistic_beamspot.root",
+                "folder": "DQMData/Run 1/HLT/Run summary/Tracking/ValidationWRTtp/hltInitialStepTrackSelectionHighPurity_hltAssociatorByHits/",
+                "plot": "effic"
+            }
+        },
+        "plot": {
+            "x": [
+                -4,
+                4,
+                "Particle pseudorapidity #eta"
+            ],
+            "y": [
+                0.0,
+                1.4,
+                "Efficiency of intialStepHighPurityTracks"
+            ],
+            "option": "",
+            "legendTitle": "Cuts comparison - initialStepHighPurity",
+            "caption": "TTbar no PU",
+            "logo": [
+                "CMS",
+                "Private Work"
+            ],
+            "colorMap": [
+                834,
+                866,
+                922,
+                902,
+                885,
+                797,
+                1
+            ],
+            "markerMap": [
+                27,
+                23,
+                21,
+                20,
+                24,
+                34,
+                58
+            ],
+            "legendRange": [
+                0.40,
+                0.67,
+                0.90,
+                0.85
+            ]
+        },
+        "output": {
+            "directory": "plots",
+            "filenamePlot": "initalStepHighPurity_effic_vs_eta_cuts_comparison",
+            "fileType": [
+                "png",
+                "pdf"
+            ]
+        }
+    }
+}
