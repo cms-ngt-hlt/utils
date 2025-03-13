@@ -180,6 +180,10 @@ for keyPlot in config:
         if hasLogY :
             option = option.replace("logY","")
             pad.SetLogy()
+        
+        overrideYLimits = option.find("overrideYLimits") > -1
+        if overrideYLimits :
+            option = option.replace("overrideYLimits","")
             
         plotX  = config[keyPlot]['plot']['x']
         plotY  = config[keyPlot]['plot']['y']
@@ -282,8 +286,8 @@ for keyPlot in config:
             histo.GetXaxis().SetTitle(plotX[2])
             histo.GetYaxis().SetTitle(plotY[2])
             
-            #histo.GetXaxis().SetRangeUser(plotX[0], plotX[1])
-            #histo.GetYaxis().SetRangeUser(plotY[0], plotY[1])
+            if overrideYLimits:
+                histo.GetYaxis().SetRangeUser(plotY[0], plotY[1])
                 
             canvas.Update()
 
