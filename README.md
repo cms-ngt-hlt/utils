@@ -1,10 +1,13 @@
 # General utilities for NGT Task 3.1.1
 
-## Plotter 
+## Plotter
+
 The plotter in this repository is meant to be used with DQM outputs from CMSSW to superimpose validation plots and compare performance. It is written in python using its ROOT interface. Plots are produced following the instructions provided in one or more `json` files. The basic recipe, thus is:
+
 ```bash
 python3 plotter.py config.json
 ```
+
 The configuration files should follow the schema provided in the examples found in the [json folder](/json). The `optiom` field can be used to customize the output plots with the following options:
 
 - `grid`: draws plots with a grid underneath
@@ -16,7 +19,8 @@ The configuration files should follow the schema provided in the examples found 
 Options should be inserted as a single, comma-separated, string in the `option` field.
 
 ## Timing script
-`hltTiming.sh` provides an automatic way to run timing measurements of the HLT. 
+
+`hltTiming.sh` provides an automatic way to run timing measurements of the HLT.
 
 Some fields inside the script are customisable and should be modified before running the script:
 
@@ -44,6 +48,19 @@ cmsDriver.py Phase2 -s L1P2GT,HLT:75e33_timing \
 ```
 
 Once the configuration is done, the script can be executed by
+
 ```bash
 . hltTiming.sh
 ```
+
+## NGT Farm extrapolations scripts
+
+Two scripts are provided to extrapolate required speedup for the NGT farm:
+
+- parametersFromMeasurements_cli is needed to extract, from measurements, the
+  HS23 performance of a GPU.
+- farmExtrapolation_twoPhases: extrapolates the required speedup for the full
+  HLT farm given specific measurements and target scenarios.
+
+More details on how to use them can be found at the following [link](https://cms-ngt-hlt.docs.cern.ch/Task311/HS23_Farm_TwoPhase_Derivation_plain/)
+
