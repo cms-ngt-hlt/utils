@@ -64,3 +64,45 @@ Two scripts are provided to extrapolate required speedup for the NGT farm:
 
 More details on how to use them can be found at the following [link](https://cms-ngt-hlt.docs.cern.ch/Task311/HS23_Farm_TwoPhase_Derivation_plain/)
 
+## NGT Bread and Butter event display generators
+
+Two scripts have been developed to generate event displays for the NGT:
+
+- overlay_detector_tracks_rz.py: generates an event display with the detector
+  geometry and tracks in the RZ plane.
+- overlay_detector_tracks_xy.py: generates an event display with the detector geometry
+  and tracks in the XY plane.
+
+### Example usage
+
+```shell
+ python3 overlay_detector_tracks_rz.py \
+  --macro fullLayout000.C \
+  --pt 2 \
+  --eta 0.2 0.5 1 1.5 2 2.5 3 4 \
+  --x0 0.00 --y0 0.00 --z0 -0.010 \
+  --R-window-cm 125 --Z-window-cm 300 --follow-z0 \
+  --macro-units-to-cm 0.1 \
+  --pdf detector_tracks_overlay_v2.pdf \
+  --png detector_tracks_overlay_v2.png --png-dpi 150
+```
+
+and
+
+```shell
+python3 overlay_detector_tracks_xy.py \
+  --macro fullLayoutBarrelXY000.C \
+  --pt 0.8 1 2 \
+  --phi0 1.5 \
+  --eta 0 \
+  --x0 0.0 --y0 0.0 --z0 0.00 \
+  --R-window-cm 100 --follow-center \
+  --macro-units-to-cm 0.1 \
+  --pdf detector_tracks_xy.pdf \
+  --png detector_tracks_xy.png --png-dpi 150
+```
+
+The produced event displays should look like the following:
+
+[R-Z plane](detector_tracks_overlay_v2.png)
+[X-Y plane](detector_tracks_xy.png)
