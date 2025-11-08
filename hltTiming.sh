@@ -1,5 +1,46 @@
 #!/bin/bash
 
+# ---------------------------------------
+# Parse command-line arguments
+# ---------------------------------------
+GPU_LIST="all"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --gpus)
+            GPU_LIST="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "Usage: $0 [--gpus <comma-separated GPU IDs>]"
+            echo "  Example: $0 --gpus 0,1"
+            exit 0
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            echo "Use --help for usage."
+            exit 1
+            ;;
+    esac
+done
+
+# ---------------------------------------
+# Apply CUDA_VISIBLE_DEVICES if requested
+# ---------------------------------------
+if [[ "$GPU_LIST" != "all" ]]; then
+    export CUDA_VISIBLE_DEVICES="$GPU_LIST"
+    echo "Using specified GPUs: $GPU_LIST"
+else
+    echo "Using all available GPUs"
+fi
+
+# Sanitize GPU list for filenames (replace commas with nothing or underscore)
+if [[ "$GPU_LIST" == "all" ]]; then
+    GPU_TAG="allGPUs"
+else
+    GPU_TAG="gpu${GPU_LIST//,/}"   # e.g. "gpu01" or "gpu23"
+fi
+
 #Add configurations to test. These correspond to python config files named NAME_config.py
 hlt_config_names=("ext" "alpaka")
 
@@ -50,8 +91,8 @@ for config_name in "${hlt_config_names[@]}"; do
         echo "  Running with Preset: jobs=$jobs, threads=$threads, streams=$streams"
 
         events=1000
-        logdir="logs.$config_name.${jobs}j.${threads}t.${streams}s"
-        output_filename="${config_name}_${jobs}j_${threads}t_${streams}s.json"
+        logdir="logs.$config_name.${jobs}j.${threads}t.${streams}s.${GPU_TAG}"
+        output_filename="${config_name}_${jobs}j_${threads}t_${streams}s_${GPU_TAG}.json"
 
         # Setup patatrack-scripts and log directory
         if [ ! -d 'patatrack-scripts' ]; then

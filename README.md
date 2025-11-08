@@ -24,6 +24,7 @@ Options should be inserted as a single, comma-separated, string in the `option` 
 
 Some fields inside the script are customisable and should be modified before running the script:
 
+- The argument `--gpus` can be used to pass a comma-separated list GPU IDs. In case none is passed all the GPU availables are used. The name of the output `json` file and logging directory reflect the amount combination of GPus used.
 - The configurations to run. The list provided inside the file must correspond to python configuration files named `NAME_config.py`. For example, if the list is `("legacy" "alpaka")` the script expects two configurations files named `legacy_config.py` and `alpaka_config.py` respectively
 - The number of jobs, threads and stream to use for the measurement. This can either be a single set of 3 numbers or a list. In the latter case, each HLT configuration will be processed with all provided sets of jobs, threads, and streams.
 - GPU memory monitoring can be switched ON/OFF by changing `ENABLE_GPU_MONITORING`
