@@ -106,10 +106,9 @@ def summarize_results(
     G = compute_G(p_gpu, P_cpu_elig_c)
     S = 1
     if Speedup_gpu["useTP"]:
-        print(Speedup_gpu)
-        S = p_gpu / Speedup_gpu["CPU"]
+        S = Speedup_gpu["GPU"] / Speedup_gpu["CPU"]
     else:
-        S = Speedup_gpu["CPU"] / p_gpu
+        S = Speedup_gpu["CPU"] / Speedup_gpu["GPU"]
     k = Speedup_gpu["numGPUs"]
     fraction = k * G * (1 - 1 / S) / (k * G - 1)
     H_gpu0 = G * H
@@ -229,18 +228,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Indicates numbers are from timing mode",
     )
     p.set_defaults(use_tp=TDR_defaults["use_tp"])
-    #    p.add_argument(
-    #        "--cpu-secs",
-    #        type=float,
-    #        default=TDR_defaults["cpu_secs"],
-    #        help="CPU time/throughput value used for the speedup ratio (units depend on mode)",
-    #    )
-    #    p.add_argument(
-    #        "--gpu-secs",
-    #        type=float,
-    #        default=TDR_defaults["gpu_secs"],
-    #        help="GPU time/throughput value used for the speedup ratio (units depend on mode)",
-    #    )
+    p.add_argument(
+        "--cpu-secs",
+        type=float,
+        default=TDR_defaults["cpu_secs"],
+        help="CPU time/throughput value used for the speedup ratio (units depend on mode)",
+    )
+    p.add_argument(
+        "--gpu-secs",
+        type=float,
+        default=TDR_defaults["gpu_secs"],
+        help="GPU time/throughput value used for the speedup ratio (units depend on mode)",
+    )
     p.add_argument(
         "--p-cpu-elig-c",
         type=float,
@@ -305,7 +304,8 @@ def main(argv=None):
     Speedup_gpu = {
         "numGPUs": int(args.num_gpus),
         "useTP": bool(args.use_tp),
-        "CPU": float(args.p_cpu_elig_c),
+        "CPU": float(args.cpu_secs),
+        "GPU": float(args.gpu_secs),
     }
 
     summarize_results(
