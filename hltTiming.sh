@@ -74,6 +74,10 @@ if [[ "$ENABLE_GPU_MONITORING" = true ]]; then
     get_current_total_gpu_mem() {
         nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | awk '{ total += $1 } END { print total }' || echo "error"
     }
+    # Function to get current GPU usage, per gpu, comma-separated
+    get_current_gpus_usage() {
+        nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | paste -sd ',' || echo "error"
+    }
 fi
 
 # Benchmark execution
@@ -81,6 +85,10 @@ echo "Starting HLT benchmark for configurations: ${hlt_config_names[@]}"
 echo "With jobs,threads,streams presets: ${jobs_threads_streams_presets[@]}"
 echo "GPU Memory Monitoring is: ${ENABLE_GPU_MONITORING}"
 echo "----------------------------------------------------"
+
+# Arrays to accumulate GPU usage, per GPU
+declare -a totals
+declare -a averages
 
 for config_name in "${hlt_config_names[@]}"; do
     echo "Configuration: $config_name"
@@ -108,8 +116,10 @@ for config_name in "${hlt_config_names[@]}"; do
         if [[ "$ENABLE_GPU_MONITORING" = true ]]; then
             # With GPU monitoring
             CSV_FILE="${logdir}/gpu_memory_${config_name}_${jobs}j_${threads}t_${streams}s.csv"
+            CSV_GPU_FILE="${logdir}/gpu_usage_${config_name}_${jobs}j_${threads}t_${streams}s.csv"
             TMP_LOG_FILE="${logdir}/benchmark.tmp.log"
             echo "elapsed_seconds,memory_mib" >"$CSV_FILE"
+            echo "elapsed_seconds,gpus_usage" >"$CSV_GPU_FILE"
 
             # Initialize monitoring variables
             max_total_memory_mib=0
@@ -143,6 +153,18 @@ for config_name in "${hlt_config_names[@]}"; do
                     sum_total_memory_mib=$((sum_total_memory_mib + current_total_mem))
                     measurement_count=$((measurement_count + 1))
                 fi
+                current_gpus_usage=$(get_current_gpus_usage)
+                if [[ "$current_gpus_usage" =~ ^[0-9,]+$ ]]; then
+                    current_time=$(date +%s)
+                    elapsed_seconds=$((current_time - START_TIME))
+                    echo "$elapsed_seconds,$current_gpus_usage" >>"$CSV_GPU_FILE"
+                    measurement_count_gpu=$((measurement_count_gpu + 1))
+                    # Update running totals
+                    IFS=',' read -ra values <<< "$current_gpus_usage"
+                    for i in "${!values[@]}"; do
+                      totals[$i]=$(( totals[$i] + values[$i] ))
+                    done
+                fi
                 sleep $MONITOR_INTERVAL
             done
 
@@ -165,6 +187,18 @@ for config_name in "${hlt_config_names[@]}"; do
                     mean_calculation_note="(integer)"
                 fi
             fi
+            if ((measurement_count_gpu > 0)); then
+              for i in "${!totals[@]}"; do
+                if [[ "$USE_FLOATING_POINT_MEAN" = true ]]; then
+                    $averages[$i]=$(echo "scale=2; $totals[$i] / $measurement_count_gpu" | bc)
+                    mean_calculation_note="(float using bc)"
+                else
+                    $averages[$i]=$(( $totals[$i] / measurement_count_gpu))
+                    mean_calculation_note="(integer)"
+                fi
+                echo "GPU-$i average: $averages[$i]%"
+              done
+            fi
 
             # Append GPU monitoring results to the log file and print to console
             tee -a "${logdir}/output.log" <<EOF
@@ -174,10 +208,16 @@ for config_name in "${hlt_config_names[@]}"; do
 -------------------------------------
 Monitoring Interval: $MONITOR_INTERVAL second(s)
 Number of Measurements: $measurement_count
-Data points saved to: '$CSV_FILE'
+Data gpu-memory points saved to: '$CSV_FILE'
+Data gpu-usage  points saved to: '$CSV_GPU_FILE'
 
 Peak Total GPU Memory Usage: $max_total_memory_mib MiB
 Mean Total GPU Memory Usage: $mean_total_memory_mib MiB $mean_calculation_note
+
+Per-GPU Mean GPU Utilization:
+$(for i in "${!averages[@]}"; do
+    printf "  GPU-%d: %f%%\n" "$i" "${averages[$i]}"
+  done)
 -------------------------------------
 EOF
         else
