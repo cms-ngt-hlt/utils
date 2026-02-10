@@ -56,8 +56,8 @@ python3 compare_multiple_json_hist.py \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-11-10-1100_scaled.json \
  --group /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/groups/hlt.json \
  --colors /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/colours/default.json \
- --labels "Legacy" "Patatrack Pixel (GPU)" "Extended Pixel (GPU)" --baseline 0 --label-fontsize 14 --lumi-text "t\\bar{t}+200~PU~|~14~TeV" --cms-text "Simulation Preliminary" \
- --level package --ignore-unassigned --metric-precision 0 --save OldLegacy/stacked_GPU.${TYPE}
+ --labels "Legacy" "Patatrack Pixel (GPU)" "Extended Pixel (GPU)" --baseline 0 --label-fontsize 14 --right-text "t\\bar{t}+200~PU~|~14~TeV" --left-text "Simulation Preliminary" \
+ --level package --ignore-unassigned --metric-precision 0 --save WithoutNewTrackingBaseline/stacked_GPU.${TYPE}
 # Compare three json with bars (GPU-based), splitting pixel triplets
 python3 compare_multiple_json_hist.py \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-10-25-1100_scaled.json \
@@ -65,8 +65,8 @@ python3 compare_multiple_json_hist.py \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-11-10-1100_scaled.json \
  --group /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/groups/hlt_pixel_trips.json \
  --colors /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/colours/pixel_trips.json \
- --labels "Legacy" "Patatrack Pixel (GPU)" "Extended Pixel (GPU)" --baseline 0 --label-fontsize 14 --lumi-text "t\\bar{t}+200~PU~|~14~TeV" --cms-text "Simulation Preliminary" \
- --level package --ignore-unassigned --metric-precision 0 --save OldLegacy/stacked_GPU_Trips.${TYPE}
+ --labels "Legacy" "Patatrack Pixel (GPU)" "Extended Pixel (GPU)" --baseline 0 --label-fontsize 14 --right-text "t\\bar{t}+200~PU~|~14~TeV" --left-text "Simulation Preliminary" \
+ --level package --ignore-unassigned --metric-precision 0 --save WithoutNewTrackingBaseline/stacked_GPU_Trips.${TYPE}
 
 # Compare three json with bars (CPU-based)
 python3 compare_multiple_json_hist.py \
@@ -75,8 +75,8 @@ python3 compare_multiple_json_hist.py \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-11-10-1100_CPU_scaled.json \
  --group /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/groups/hlt.json \
  --colors /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/colours/default.json \
- --labels "Legacy" "Patatrack Pixel (CPU)" "Extended Pixel (CPU)" --baseline 0 --label-fontsize 14 --lumi-text "t\\bar{t}+200~PU~|~14~TeV" --cms-text "Simulation Preliminary" \
- --level package --ignore-unassigned --metric-precision 0 --save OldLegacy/stacked_CPU.${TYPE}
+ --labels "Legacy" "Patatrack Pixel (CPU)" "Extended Pixel (CPU)" --baseline 0 --label-fontsize 14 --right-text "t\\bar{t}+200~PU~|~14~TeV" --left-text "Simulation Preliminary" \
+ --level package --ignore-unassigned --metric-precision 0 --save WithoutNewTrackingBaseline/stacked_CPU.${TYPE}
 # Compare three json with bars (CPU-based), splitting pixel triplets
 python3 compare_multiple_json_hist.py \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-10-25-1100_scaled.json \
@@ -84,8 +84,8 @@ python3 compare_multiple_json_hist.py \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-11-10-1100_CPU_scaled.json \
  --group /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/groups/hlt_pixel_trips.json \
  --colors /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/colours/pixel_trips.json \
- --labels "Legacy" "Patatrack Pixel (CPU)" "Extended Pixel (CPU)" --baseline 0 --label-fontsize 14 --lumi-text "t\\bar{t}+200~PU~|~14~TeV" --cms-text "Simulation Preliminary" \
- --level package --ignore-unassigned --metric-precision 0 --save OldLegacy/stacked_CPU_Trips.${TYPE}
+ --labels "Legacy" "Patatrack Pixel (CPU)" "Extended Pixel (CPU)" --baseline 0 --label-fontsize 14 --right-text "t\\bar{t}+200~PU~|~14~TeV" --left-text "Simulation Preliminary" \
+ --level package --ignore-unassigned --metric-precision 0 --save WithoutNewTrackingBaseline/stacked_CPU_Trips.${TYPE}
 
 # Compare two json with bars (GPU-based vs CPU-based)
 python3 compare_multiple_json_hist.py \
@@ -93,30 +93,30 @@ python3 compare_multiple_json_hist.py \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-10-30-1100_scaled.json \
  --group /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/groups/hlt.json \
  --colors /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/colours/default.json \
- --labels "Patatrack Pixel (CPU)" "Patatrack Pixel (GPU)" --baseline 0 --label-fontsize 14 --lumi-text "t\\bar{t}+200~PU~|~14~TeV" --cms-text "Simulation Preliminary" \
- --level package --ignore-unassigned --metric-precision 0 --save OldLegacy/stacked_2_CPU.${TYPE}
+ --labels "Patatrack Pixel (CPU)" "Patatrack Pixel (GPU)" --baseline 0 --label-fontsize 14 --right-text "t\\bar{t}+200~PU~|~14~TeV" --left-text "Simulation Preliminary" \
+ --level package --ignore-unassigned --metric-precision 0 --save WithoutNewTrackingBaseline/stacked_2_CPU.${TYPE}
 python3 compare_multiple_json_hist.py \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-11-10-1100_CPU_scaled.json \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-11-10-1100_scaled.json \
  --group /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/groups/hlt.json \
  --colors /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/colours/default.json \
- --labels "Extended Pixel (CPU)" "Extended Pixel (GPU)" --baseline 0 --label-fontsize 14 --lumi-text "t\\bar{t}+200~PU~|~14~TeV" --cms-text "Simulation Preliminary" \
- --level package --ignore-unassigned --metric-precision 0 --save OldLegacy/stacked_3_CPU.${TYPE}
+ --labels "Extended Pixel (CPU)" "Extended Pixel (GPU)" --baseline 0 --label-fontsize 14 --right-text "t\\bar{t}+200~PU~|~14~TeV" --left-text "Simulation Preliminary" \
+ --level package --ignore-unassigned --metric-precision 0 --save WithoutNewTrackingBaseline/stacked_3_CPU.${TYPE}
 # Compare two json with bars (GPU-based vs CPU-based), splitting pixel triplets
 python3 compare_multiple_json_hist.py \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-10-30-1100_CPU_scaled.json \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-10-30-1100_scaled.json \
  --group /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/groups/hlt_pixel_trips.json \
  --colors /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/colours/pixel_trips.json \
- --labels "Patatrack Pixel (CPU)" "Patatrack Pixel (GPU)" --baseline 0 --label-fontsize 14 --lumi-text "t\\bar{t}+200~PU~|~14~TeV" --cms-text "Simulation Preliminary" \
- --level package --ignore-unassigned --metric-precision 0 --save OldLegacy/stacked_2_CPU_Trips.${TYPE}
+ --labels "Patatrack Pixel (CPU)" "Patatrack Pixel (GPU)" --baseline 0 --label-fontsize 14 --right-text "t\\bar{t}+200~PU~|~14~TeV" --left-text "Simulation Preliminary" \
+ --level package --ignore-unassigned --metric-precision 0 --save WithoutNewTrackingBaseline/stacked_2_CPU_Trips.${TYPE}
 python3 compare_multiple_json_hist.py \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-11-10-1100_CPU_scaled.json \
  Phase2Timing_resources_NGT_CMSSW_16_0_X_2025-11-10-1100_scaled.json \
  --group /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/groups/hlt_pixel_trips.json \
  --colors /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/circles/web/colours/pixel_trips.json \
- --labels "Extended Pixel (CPU)" "Extended Pixel (GPU)" --baseline 0 --label-fontsize 14 --lumi-text "t\\bar{t}+200~PU~|~14~TeV" --cms-text "Simulation Preliminary" \
- --level package --ignore-unassigned --metric-precision 0 --save OldLegacy/stacked_3_CPU_Trips.${TYPE}
+ --labels "Extended Pixel (CPU)" "Extended Pixel (GPU)" --baseline 0 --label-fontsize 14 --right-text "t\\bar{t}+200~PU~|~14~TeV" --left-text "Simulation Preliminary" \
+ --level package --ignore-unassigned --metric-precision 0 --save WithoutNewTrackingBaseline/stacked_3_CPU_Trips.${TYPE}
 
 ############################################################################
 # Validation of three configurations
@@ -278,6 +278,18 @@ JETS="HLT PFJets Performance"
 # JETS="HLT PFJets Performance"
 
 python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/chargedHadronMultiplicity" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" \
+--pdf --energy-text "${TITLE}" --legend-title "${JETS}" --web --ylim-ratio "0.5,1.5" --histogram --normalize \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
+
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/chargedHadronMultiplicity_" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" \
+--pdf --energy-text "${TITLE}" --legend-title "${JETS}" --web --ylim-ratio "0.5,1.5" --histogram --normalize \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
+
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
  "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/Eff_vs_Eta" \
 --legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" \
 --pdf --energy-text "${TITLE}" --legend-title "${JETS}" --web --xlim="-4.,4." --ylim-ratio "0.95,1.05" --ylim "0,1.35" \
@@ -396,11 +408,17 @@ OUTDIR="QCD200PU_Validation_PFPuppiJets"
 TITLE="QCD+200PU~(14~TeV)"
 JETS="HLT PFPuppiJets Performance"
 
-# cd AAA_Test/QCD_200PU_NoQuality
-# JETTYPE="hltAK4PFPuppiJets"
-# OUTDIR="QCD200PU_NoQuality_Validation_PFPuppiJets"
-# TITLE="QCD+200PU~(14~TeV)"
-# JETS="PFPuppiJets Performance"
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/chargedHadronMultiplicity" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" \
+--pdf --energy-text "${TITLE}" --legend-title "${JETS}" --web --ylim-ratio "0.5,1.5" --ylim "0,3000" --histogram \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
+
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/chargedHadronMultiplicity_" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" \
+--pdf --energy-text "${TITLE}" --legend-title "${JETS}" --web --ylim-ratio "0.5,1.5" --histogram \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
 
 python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
  "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/Eff_vs_Eta" \
@@ -522,6 +540,60 @@ TITLE="QCD+200PU~(14~TeV)"
 JETS="HLT PFPuppiJets Corrected Performance"
 
 python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/Eff_vs_Eta" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" \
+--pdf --energy-text "${TITLE}" --legend-title "${JETS}" --web --xlim="-4.,4." --ylim-ratio "0.8,1.2" --ylim "0,1.35" \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
+
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/Eff_vs_Pt_B" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" \
+--rebin "40, 60, 80, 100, 120, 140, 160, 180, 200, 225, 250, 275, 300, 350, 400, 450, 500, 550, 600" --no-logx \
+--pdf --energy-text "${TITLE}" --legend-title="${JETS} - Barrel ($ |\eta|<1.5 $)" --web --xlim "25,600" --ylim-ratio "0.8,1.2" --ylim "0,1.35" \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
+
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/Eff_vs_Pt_E" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" \
+--rebin "40, 60, 80, 100, 120, 140, 160, 180, 200, 225, 250, 275, 300, 350, 400, 450, 500, 550, 600" --no-logx \
+--pdf --energy-text "${TITLE}" --legend-title="${JETS} - Endcap ($ 1.5<|\eta|<3 $)" --web --xlim "25,600" --ylim-ratio "0.8,1.2" --ylim "0,1.35" \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
+
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/Eff_vs_Pt_F" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" \
+--rebin "40, 60, 80, 100, 150, 200" --no-logx \
+--pdf --energy-text "${TITLE}" --legend-title="${JETS} - Forward ($ |\eta|>3 $)" --web --xlim "25,200" --ylim-ratio "0.8,1.2" --ylim "0,1.35" \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
+
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/Fake_vs_Eta" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" --revert \
+--pdf --energy-text "${TITLE}" --legend-title "${JETS}" --web --xlim="-4.,4." --ylim-ratio "0.,2." --logy --ylim="0.0001,10" \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
+
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/Fake_vs_Pt_B" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" --revert \
+--rebin "40, 60, 80, 100, 120, 140, 160, 180, 200, 225, 250, 275, 300, 350, 400, 450, 500, 550, 600" --no-logx \
+--pdf --energy-text "${TITLE}" --legend-title="${JETS} - Barrel ($ |\eta|<1.5 $)" --web --xlim "25,600" --logy --ylim="0.0001,10" \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
+
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/Fake_vs_Pt_E" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" --revert \
+--rebin "40, 60, 80, 100, 120, 140, 160, 180, 200, 225, 250, 275, 300, 350, 400, 450, 500, 550, 600" --no-logx \
+--pdf --energy-text "${TITLE}" --legend-title="${JETS} - Endcap ($ 1.5<|\eta|<3 $)" --web --xlim "25,600" --logy --ylim="0.0001,10" \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
+
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
+ "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/Fake_vs_Pt_F" \
+--legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" --revert \
+--rebin "40, 60, 80, 100, 150, 200" --no-logx \
+--pdf --energy-text "${TITLE}" --legend-title="${JETS} - Forward ($ |\eta|>3 $)" --web --xlim "25,200" --logy --ylim="0.0001,10" \
+NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
+
+python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s \
  "DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/${JETTYPE}/ResFit_CorrOverGen_GenEta_Mean" \
 --legend "Legacy,Patatrack Pixel,Extended Pixel" -o "/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/${OUTDIR}" \
 --pdf --energy-text "${TITLE}" --legend-title "${JETS}" --web --xlim="-4.,4." --ylim "0.,2." --ylim-ratio "0.8,1.2" --histogram --no-logx \
@@ -639,6 +711,7 @@ python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot-ratio \
  --pdf --energy-text "${TITLE}" --legend-title="${JETS} - Forward ($ |\eta|>3 $)" --web --xlim "25,200" --ylim "0.,0.5" --ylim-ratio "0.5,1.5" \
 NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
 
+python3 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/Resolution_from_DQMFile_without.py
 
 # Muons
 
@@ -707,7 +780,7 @@ NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/D
 
 python3 ${CMSSW_BASE}/src/DQMServices/Components/scripts/dqm-plot -s "DQMData/Run 1/HLT/Run summary/Vertexing/ValidationWRTReconstructableSim/hltOfflinePrimaryVertices/KindOfSignalPV" \
 --legend "Legacy,Patatrack Pixel,Extended Pixel" -o /eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/TTbar200PU_Validation_Vertices/ \
---pdf --energy-text="t\bar{t} + 200PU~(14~TeV)" --web --legend-title "HLT DA Primary Vertices Performance" --xlim="-0.5,5.5" --ylim "0.,1.25" --ylim-ratio "0,3" \
+--pdf --energy-text="t\bar{t} + 200PU~(14~TeV)" --web --legend-title "HLT DA Primary Vertices Performance" --xlim="-0.5,5.5" --ylim "0.,1.25" --ylim-ratio "0,2" \
 --normalize --histogram --rebin="-0.5,1.5,3.5,5.5" \
 NGTScouting1/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting2/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root NGTScouting3/DQM_V0001_R000000001__Global__CMSSW_X_Y_Z__RECO.root
 
