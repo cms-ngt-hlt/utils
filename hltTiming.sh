@@ -7,20 +7,20 @@ GPU_LIST="all"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --gpus)
-            GPU_LIST="$2"
-            shift 2
-            ;;
-        -h|--help)
-            echo "Usage: $0 [--gpus <comma-separated GPU IDs>]"
-            echo "  Example: $0 --gpus 0,1"
-            exit 0
-            ;;
-        *)
-            echo "Unknown argument: $1"
-            echo "Use --help for usage."
-            exit 1
-            ;;
+    --gpus)
+        GPU_LIST="$2"
+        shift 2
+        ;;
+    -h | --help)
+        echo "Usage: $0 [--gpus <comma-separated GPU IDs>]"
+        echo "  Example: $0 --gpus 0,1"
+        exit 0
+        ;;
+    *)
+        echo "Unknown argument: $1"
+        echo "Use --help for usage."
+        exit 1
+        ;;
     esac
 done
 
@@ -38,7 +38,7 @@ fi
 if [[ "$GPU_LIST" == "all" ]]; then
     GPU_TAG="allGPUs"
 else
-    GPU_TAG="gpu${GPU_LIST//,/}"   # e.g. "gpu01" or "gpu23"
+    GPU_TAG="gpu${GPU_LIST//,/}" # e.g. "gpu01" or "gpu23"
 fi
 
 #Add configurations to test. These correspond to python config files named NAME_config.py
@@ -52,8 +52,8 @@ jobs_threads_streams_presets=(
 )
 
 # GPU Monitoring Configuration
-ENABLE_GPU_MONITORING=true  # Set to 'false' to disable GPU memory checks
-MONITOR_INTERVAL=1           # Check GPU memory every X seconds
+ENABLE_GPU_MONITORING=true   # Set to 'false' to disable GPU resources checks
+MONITOR_INTERVAL=1           # Check GPU resources every X seconds
 USE_FLOATING_POINT_MEAN=true # Use 'bc' for a more precise mean; falls back to integer if 'bc' not found
 
 # Check prerequisites for GPU Monitoring
@@ -83,12 +83,13 @@ fi
 # Benchmark execution
 echo "Starting HLT benchmark for configurations: ${hlt_config_names[@]}"
 echo "With jobs,threads,streams presets: ${jobs_threads_streams_presets[@]}"
-echo "GPU Memory Monitoring is: ${ENABLE_GPU_MONITORING}"
+echo "GPU Monitoring is: ${ENABLE_GPU_MONITORING}"
 echo "----------------------------------------------------"
 
 # Arrays to accumulate GPU usage, per GPU
 declare -a totals
 declare -a averages
+declare -a max_usage
 
 for config_name in "${hlt_config_names[@]}"; do
     echo "Configuration: $config_name"
@@ -125,6 +126,7 @@ for config_name in "${hlt_config_names[@]}"; do
             max_total_memory_mib=0
             sum_total_memory_mib=0
             measurement_count=0
+            measurement_count_gpu=0
             START_TIME=$(date +%s)
 
             echo "    Starting benchmark with GPU memory monitoring..."
@@ -159,10 +161,14 @@ for config_name in "${hlt_config_names[@]}"; do
                     elapsed_seconds=$((current_time - START_TIME))
                     echo "$elapsed_seconds,$current_gpus_usage" >>"$CSV_GPU_FILE"
                     measurement_count_gpu=$((measurement_count_gpu + 1))
-                    # Update running totals
-                    IFS=',' read -ra values <<< "$current_gpus_usage"
+                    # Update running totals and maximums
+                    IFS=',' read -ra values <<<"$current_gpus_usage"
                     for i in "${!values[@]}"; do
-                      totals[$i]=$(( totals[$i] + values[$i] ))
+                        totals[$i]=$((${totals[$i]:-0} + values[$i]))
+                        # Track maximum
+                        if ((values[$i] > ${max_usage[$i]:-0})); then
+                            max_usage[$i]=${values[$i]}
+                        fi
                     done
                 fi
                 sleep $MONITOR_INTERVAL
@@ -188,23 +194,20 @@ for config_name in "${hlt_config_names[@]}"; do
                 fi
             fi
             if ((measurement_count_gpu > 0)); then
-              for i in "${!totals[@]}"; do
-                if [[ "$USE_FLOATING_POINT_MEAN" = true ]]; then
-                    $averages[$i]=$(echo "scale=2; $totals[$i] / $measurement_count_gpu" | bc)
-                    mean_calculation_note="(float using bc)"
-                else
-                    $averages[$i]=$(( $totals[$i] / measurement_count_gpu))
-                    mean_calculation_note="(integer)"
-                fi
-                echo "GPU-$i average: $averages[$i]%"
-              done
+                for i in "${!totals[@]}"; do
+                    if [[ "$USE_FLOATING_POINT_MEAN" = true ]]; then
+                        averages[$i]=$(echo "scale=2; ${totals[$i]} / $measurement_count_gpu" | bc)
+                    else
+                        averages[$i]=$((totals[$i] / measurement_count_gpu))
+                    fi
+                done
             fi
 
             # Append GPU monitoring results to the log file and print to console
             tee -a "${logdir}/output.log" <<EOF
 
 -------------------------------------
-           GPU MEMORY USAGE
+           GPU USAGE
 -------------------------------------
 Monitoring Interval: $MONITOR_INTERVAL second(s)
 Number of Measurements: $measurement_count
@@ -216,8 +219,8 @@ Mean Total GPU Memory Usage: $mean_total_memory_mib MiB $mean_calculation_note
 
 Per-GPU Mean GPU Utilization:
 $(for i in "${!averages[@]}"; do
-    printf "  GPU-%d: %f%%\n" "$i" "${averages[$i]}"
-  done)
+                printf "  GPU-%d: %s%% (mean), %s%% (max)\n" "$i" "${averages[$i]}" "${max_usage[$i]}"
+            done)
 -------------------------------------
 EOF
         else
