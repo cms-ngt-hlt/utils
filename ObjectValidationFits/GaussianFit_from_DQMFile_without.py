@@ -159,7 +159,13 @@ def thousands(x, pos):
     return f"{x*10000:.0f}"
 
 fontsize = 18; size_x = 9; size_y = 9
-labels = ['Legacy', 'Patatrack Patatrack', 'Extended Patatrack']
+labels = ['Legacy', 'Patatrack', 'Extended Patatrack']
+
+def get_pull_x_title(dim):
+    return f"$({dim}^{{\mathrm{{reco}}}} - {dim}^{{\mathrm{{sim}}}})/\delta {dim}^{{\mathrm{{reco}}}}$"
+
+def get_res_x_title(dim):
+    return f"${dim}^{{\mathrm{{reco}}}} - {dim}^{{\mathrm{{sim}}}}$ [$\mu m$]"
 
 for dim in ['X', 'Y', 'Z']:
     
@@ -167,7 +173,7 @@ for dim in ['X', 'Y', 'Z']:
     rebin = 2; y_max = 900; normalize=False
     # rebin = 2; y_max = 100; normalize=False
     dqm_dir = f'DQMData/Run 1/HLT/Run summary/Vertexing/hltFullVertices/Resolution/PV/pull_{dim.lower()}'
-    x_title = f'Pull {dim.lower()}'
+    x_title = get_pull_x_title(dim.lower())
     y_title = '# Primary Vertices'
     output_path = f'/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/TTbar200PU_Validation_Vertices/Pull{dim}_GaussianFit'
     plot_comparison(x_min=-4.5, x_max=4.5)
@@ -175,7 +181,7 @@ for dim in ['X', 'Y', 'Z']:
     # Comparison pull wrt sim
     rebin = None; y_max = 900; normalize=False
     dqm_dir = f'DQMData/Run 1/HLT/Run summary/Vertexing/ValidationWRTReconstructableSim/hltOfflinePrimaryVertices/RecoPVAssoc2GenPVMatched_Pull{dim}'
-    x_title = f'Pull {dim.lower()}'
+    x_title = get_pull_x_title(dim.lower())
     y_title = '# Primary Vertices'
     output_path = f'/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/TTbar200PU_Validation_Vertices/Pull{dim}_GaussianFit_Sim'
     plot_comparison(x_min=-4.5, x_max=4.5)
@@ -183,7 +189,7 @@ for dim in ['X', 'Y', 'Z']:
     # Comparison resolution
     rebin = None; y_max = 2500; normalize=False
     dqm_dir = f'DQMData/Run 1/HLT/Run summary/Vertexing/hltFullVertices/Resolution/PV/res_{dim.lower()}'
-    x_title = f'Resolution {dim.lower()} [$\mu m$]'
+    x_title = get_res_x_title(dim.lower())
     y_title = '# Primary Vertices'
     output_path = f'/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/TTbar200PU_Validation_Vertices/Res{dim}_GaussianFit'
     plot_comparison(x_min=-0.005, x_max=0.005, x_rescale=True)
@@ -191,7 +197,7 @@ for dim in ['X', 'Y', 'Z']:
     # Comparison resolution wrt sim
     rebin = None; y_max = 1750; normalize=False
     dqm_dir = f'DQMData/Run 1/HLT/Run summary/Vertexing/ValidationWRTReconstructableSim/hltOfflinePrimaryVertices/RecoPVAssoc2GenPVMatched_Resol{dim}'
-    x_title = f'Resolution {dim.lower()} [$\mu m$]'
+    x_title = get_res_x_title(dim.lower())
     y_title = '# Primary Vertices'
     output_path = f'/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/TTbar200PU_Validation_Vertices/Res{dim}_GaussianFit_Sim'
     plot_comparison(x_min=-0.005, x_max=0.005, x_rescale=True)

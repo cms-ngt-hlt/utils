@@ -137,7 +137,7 @@ pt_colors = [ "#bd1f01",  "#e76300", "#ffa90e", "#27d452", "#24580f", "#3fdab3",
 colors = [ "#3f8fda", "#ffa90e", "#bd1f01"]
 markers = [ "o", "s", "D", "p"]
 fontsize = 18; size_x = 9; size_y = 9
-labels = ['Legacy', 'Patatrack Patatrack', 'Extended Patatrack']
+labels = ['Legacy', 'Patatrack', 'Extended Patatrack']
 
 def plot_response(x_min=None, x_max=None, type='Pt', bins=None, range=3, region=None, output=None):
 
@@ -245,24 +245,24 @@ def plot_comparison(bins, mean_vals, mean_errs, sigma_vals, sigma_errs, xbin='Pt
             base_contents = bin_contents
             base_yerr = yerr
     if xbin == 'Pt':
-        ax_ratio.set_xlabel(r"$p_{\mathrm{T}}^{\mathrm{gen}}$ [GeV]", fontsize=26)
+        ax_ratio.set_xlabel(r"Simulated Jet $p_{\mathrm{T}}$ [GeV]", fontsize=26)
     elif xbin == 'Eta':
-        ax_ratio.set_xlabel(r"$\eta^{\mathrm{gen}}$", fontsize=26)
+        ax_ratio.set_xlabel(r"Simulated Jet $\eta$", fontsize=26)
     if type == 'Resolution':
         if 'RecoOverGen' in dqm_dir:
-            ax_main.set_ylabel(r'$\sigma$($p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{gen}}$)/<$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{gen}}$>',
+            ax_main.set_ylabel(r'$\sigma$($p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{sim}}$)/<$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{sim}}$>',
                                fontsize=26)
         else:
-            ax_main.set_ylabel(r'$\sigma$($p_{\mathrm{T}}^{\mathrm{corr}}/p_{\mathrm{T}}^{\mathrm{gen}}$)/<$p_{\mathrm{T}}^{\mathrm{corr}}/p_{\mathrm{T}}^{\mathrm{gen}}$>',
+            ax_main.set_ylabel(r'$\sigma$($p_{\mathrm{T}}^{\mathrm{corr}}/p_{\mathrm{T}}^{\mathrm{sim}}$)/<$p_{\mathrm{T}}^{\mathrm{corr}}/p_{\mathrm{T}}^{\mathrm{sim}}$>',
                                fontsize=26)
         print(f'ymin: {ymin}, ymax: {ymax}')
         ax_main.set_ylim(ymin if ymin is not None else 0, ymax if ymax is not None else 0.5)
     elif type == 'Scale':
         if 'RecoOverGen' in dqm_dir:
-            ax_main.set_ylabel(r'<$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{gen}}$>',
+            ax_main.set_ylabel(r'<$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{sim}}$>',
                                fontsize=26)
         else:
-            ax_main.set_ylabel(r'<$p_{\mathrm{T}}^{\mathrm{corr}}/p_{\mathrm{T}}^{\mathrm{gen}}$>',
+            ax_main.set_ylabel(r'<$p_{\mathrm{T}}^{\mathrm{corr}}/p_{\mathrm{T}}^{\mathrm{sim}}$>',
                                 fontsize=26)
         ax_main.set_ylim(ymin if ymin is not None else 0, ymax if ymax is not None else 2)
         ax_main.axhline(1.0, color='black', linestyle='--', linewidth=1)
@@ -310,7 +310,7 @@ def plot_comparison(bins, mean_vals, mean_errs, sigma_vals, sigma_errs, xbin='Pt
 
 output_path = f'/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/QCD200PU_Validation_PFPuppiJets_Corrected/'
 jet_type = 'HLT PF Puppi Jets Corrected'
-x_title = r"$p_{\mathrm{T}}^{\mathrm{corr}}/p_{\mathrm{T}}^{\mathrm{gen}}$"
+x_title = r"$p_{\mathrm{T}}^{\mathrm{corr}}/p_{\mathrm{T}}^{\mathrm{sim}}$"
 y_title = f'Entries'
 
 dqm_dir = f'DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/hltAK4PFPuppiJets/h2d_PtCorrOverGen_GenPt_B'
@@ -342,7 +342,7 @@ plot_comparison(bins, mean_vals, mean_errs, sigma_vals, sigma_errs, xbin='Pt', t
 
 # Eta dependence
 
-x_title = r"$p_{\mathrm{T}}^{\mathrm{corr}}/p_{\mathrm{T}}^{\mathrm{gen}}$"
+x_title = r"$p_{\mathrm{T}}^{\mathrm{corr}}/p_{\mathrm{T}}^{\mathrm{sim}}$"
 y_title = f'Entries'
 dqm_dir = f'DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/hltAK4PFPuppiJets/h2d_PtCorrOverGen_GenEta'
 output_name = output_path + f'Response_EtaBins'
@@ -370,7 +370,7 @@ plot_comparison(bins, mean_vals, mean_errs, sigma_vals, sigma_errs, xbin='Eta', 
 
 output_path = f'/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/QCD200PU_Validation_PFJets/'
 jet_type = 'HLT PF Jets'
-x_title = r"$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{gen}}$"
+x_title = r"$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{sim}}$"
 y_title = f'Entries'
 
 dqm_dir = f'DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/hltAK4PFJets/h2d_PtRecoOverGen_GenPt_B'
@@ -402,7 +402,7 @@ plot_comparison(bins, mean_vals, mean_errs, sigma_vals, sigma_errs, xbin='Pt', t
 
 # Eta dependence
 
-x_title = r"$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{gen}}$"
+x_title = r"$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{sim}}$"
 y_title = f'Entries'
 dqm_dir = f'DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/hltAK4PFJets/h2d_PtRecoOverGen_GenEta'
 output_name = output_path + f'Response_EtaBins'
@@ -430,7 +430,7 @@ plot_comparison(bins, mean_vals, mean_errs, sigma_vals, sigma_errs, xbin='Eta', 
 
 output_path = f'/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/WithoutNewTrackingBaseline/QCD200PU_Validation_PFPuppiJets/'
 jet_type = 'HLT PF Puppi Jets'
-x_title = r"$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{gen}}$"
+x_title = r"$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{sim}}$"
 y_title = f'Entries'
 
 dqm_dir = f'DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/hltAK4PFPuppiJets/h2d_PtRecoOverGen_GenPt_B'
@@ -462,7 +462,7 @@ plot_comparison(bins, mean_vals, mean_errs, sigma_vals, sigma_errs, xbin='Pt', t
 
 # Eta dependence
 
-x_title = r"$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{gen}}$"
+x_title = r"$p_{\mathrm{T}}^{\mathrm{reco}}/p_{\mathrm{T}}^{\mathrm{sim}}$"
 y_title = f'Entries'
 dqm_dir = f'DQMData/Run 1/HLT/Run summary/JetMET/JetValidation/hltAK4PFPuppiJets/h2d_PtRecoOverGen_GenEta'
 output_name = output_path + f'Response_EtaBins'

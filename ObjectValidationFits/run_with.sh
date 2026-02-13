@@ -145,6 +145,32 @@ python3 compare_multiple_json_hist.py \
  --level package --ignore-unassigned --metric-precision 0 --save WithNewTrackingBaseline/stacked_4_CPU_Trips.${TYPE}
 
 ############################################################################
+# Memory Profiles
+############################################################################
+
+python3 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/Plot_GPU_Profile.py \
+--file1 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/gpu_memory/gpu_memory_NGTScouting_16j_16t_16s.csv \
+--file2 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/gpu_memory/gpu_memory_NGTScoutingNewBaseline_16j_16t_16s.csv \
+--file3 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/gpu_memory/gpu_memory_NGTScoutingCAExt_16j_16t_16s.csv \
+--label1 "Patatrack" \
+--label2 "Ext. Patatrack + LST + MkFit" \
+--label3 "Ext. Patatrack" \
+--type memory_mib \
+--output /eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/TimingPlots/memory_profile_gpu.png
+
+python3 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/Plot_GPU_Profile.py \
+--file1 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/cpu_memory/rss_memory_NGTScoutingLegacyOnCPU_16j_16t_16s.csv \
+--file2 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/cpu_memory/rss_memory_NGTScoutingOnCPU_16j_16t_16s.csv \
+--file3 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/cpu_memory/rss_memory_NGTScoutingNewBaselineOnCPU_16j_16t_16s.csv \
+--file4 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/cpu_memory/rss_memory_NGTScoutingCAExtOnCPU_16j_16t_16s.csv \
+--label1 "Legacy" \
+--label2 "Patatrack" \
+--label3 "Ext. Patatrack + LST + MkFit" \
+--label4 "Ext. Patatrack" \
+--type rss_mib \
+--output /eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/TimingPlots/memory_profile_cpu.png 
+
+############################################################################
 # Validation of three configurations
 ############################################################################
 

@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 
 # usage:
-# python3 plotMemory.py \
-#   file1.csv file2.csv file3.csv \
-#   --label1 NewBaseline --label2 Current --label3 Optimized
+# python3 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/Plot_GPU_Profile.py \
+#  --file1 gpu_memory_NGTScouting_16j_16t_16s.csv \
+#  --file2 gpu_memory_NGTScoutingNewBaseline_16j_16t_16s.csv \
+#  --file3 gpu_memory_NGTScoutingCAExt_16j_16t_16s.csv \
+#  --label1 "Patatrack" \
+#  --label2 "Ext. Patatrack + LST + MkFit" \
+#  --label3 "Ext. Patatrack" \
+#  --type memory_mib \
+#  --output memory_profile_gpu.png
 
 import argparse
 import pandas as pd
@@ -82,35 +88,10 @@ def main(args):
     )
 
     plt.tight_layout()
-    print(f"Saved plots to: /eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/TimingPlots/{args.output}")
-    plt.savefig(f"/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/TimingPlots/{args.output}", dpi=150, bbox_inches="tight")
-    plt.savefig(f"/eos/user/e/evernazz/www/NGT/Scouting/DPNotePlots/TimingPlots/{args.output.replace('.png', '.pdf')}", dpi=150, bbox_inches="tight")
+    print(f"Saved plots to: {args.output}")
+    plt.savefig(f"{args.output}", dpi=150, bbox_inches="tight")
+    plt.savefig(f"{args.output.replace('.png', '.pdf')}", dpi=150, bbox_inches="tight")
     plt.show()
-
-'''
-python3 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/Plot_GPU_Profile.py \
---file1 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/gpu_memory/gpu_memory_NGTScouting_16j_16t_16s.csv \
---file2 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/gpu_memory/gpu_memory_NGTScoutingNewBaseline_16j_16t_16s.csv \
---file3 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/gpu_memory/gpu_memory_NGTScoutingCAExt_16j_16t_16s.csv \
---label1 "Patatrack" \
---label2 "Ext. Patatrack + LST + MkFit" \
---label3 "Ext. Patatrack" \
---type memory_mib \
---output memory_profile_gpu.png
-'''
-'''
-python3 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/Plot_GPU_Profile.py \
---file1 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/cpu_memory/rss_memory_NGTScoutingLegacyOnCPU_16j_16t_16s.csv \
---file2 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/cpu_memory/rss_memory_NGTScoutingOnCPU_16j_16t_16s.csv \
---file3 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/cpu_memory/rss_memory_NGTScoutingNewBaselineOnCPU_16j_16t_16s.csv \
---file4 /data/evernazz/NanoAOD/2026_01_12/NGT_Timing/cpu_memory/rss_memory_NGTScoutingCAExtOnCPU_16j_16t_16s.csv \
---label1 "Legacy" \
---label2 "Patatrack" \
---label3 "Ext. Patatrack + LST + MkFit" \
---label4 "Ext. Patatrack" \
---type rss_mib \
---output memory_profile_cpu.png 
-'''
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
