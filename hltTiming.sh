@@ -113,6 +113,17 @@ for config_name in "${hlt_config_names[@]}"; do
             mkdir -p "${logdir}"
         fi
 
+        # Create jobReport for accurate input measurements
+        if [ ! -f "jobReport.xml" ]; then
+            echo "Creating jobReport.xml for accurate input measurements"
+            cp "$cfg" tmp_cfg.py
+            cat <<@EOF >>tmp_cfg.py
+process.maxEvents.input = cms.untracked.int32(10)
+@EOF
+            cmsRun -j jobReport.xml tmp_cfg.py >report.log 2>&1 && rm tmp_cfg.py
+            echo "jobReport.xml created successfully." && rm report.log
+        fi
+
         # Run the benchmark
         if [[ "$ENABLE_GPU_MONITORING" = true ]]; then
             # With GPU monitoring
@@ -132,8 +143,8 @@ for config_name in "${hlt_config_names[@]}"; do
             echo "    Starting benchmark with GPU memory monitoring..."
 
             # Start the benchmark, redirecting output to a temporary log file
-            patatrack-scripts/benchmark -j ${jobs} -t ${threads} -s ${streams} -e ${events} --run-io-benchmark \
-                -k Phase2Timing_resources.json --event-skip 100 --event-resolution 25 --wait 30 \
+            patatrack-scripts/benchmark -j ${jobs} -t ${threads} -s ${streams} -e ${events} --input-benchmark \
+                --input-xml jobReport.xml -k Phase2Timing_resources.json --event-skip 100 --event-resolution 25 --wait 30 \
                 --logdir ${logdir} -- ${cfg} >"$TMP_LOG_FILE" 2>&1 &
             PROGRAM_PID=$!
 
@@ -226,8 +237,8 @@ EOF
         else
             # Without GPU Monitoring
             echo "    Starting benchmark without GPU memory monitoring..."
-            patatrack-scripts/benchmark -j ${jobs} -t ${threads} -s ${streams} -e ${events} --run-io-benchmark \
-                -k Phase2Timing_resources.json --event-skip 100 --event-resolution 25 --wait 30 \
+            patatrack-scripts/benchmark -j ${jobs} -t ${threads} -s ${streams} -e ${events} --input-benchmark \
+                --input-xml jobReport.xml -k Phase2Timing_resources.json --event-skip 100 --event-resolution 25 --wait 30 \
                 --logdir ${logdir} -- ${cfg} | tee ${logdir}/output.log
         fi
 
@@ -239,6 +250,9 @@ EOF
             echo "Running augmentResources.py"
             python3 "$script_dir/augmentResources.py"
         fi
+
+        # Remove the jobReport file so that it can be regenerated for the next preset
+        rm -f jobReport.xml
 
         cp -p ${output_filename} ${logdir}
         cp -p ${cfg} ${logdir}
