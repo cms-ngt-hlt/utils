@@ -70,9 +70,9 @@ if [[ "$ENABLE_RESOURCES_MONITORING" = true ]]; then
         USE_FLOATING_POINT_MEAN=false
     fi
 
-    # Function to get current total GPU memory usage
-    get_current_total_gpu_mem() {
-        nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | awk '{ total += $1 } END { print total }' || echo "error"
+    # Function to get current GPU memory usage, per gpu, comma-separated, and total
+    get_current_gpu_mem() {
+        nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | awk '{ printf "%s,", $1; total += $1 } END { print total }' || echo "error"
     }
 
     # Function to get current GPU usage, per gpu, comma-separated
@@ -193,9 +193,10 @@ process.maxEvents.input = cms.untracked.int32(10)
                 elapsed_seconds=$((current_time - START_TIME))
 
                 # GPU Memory Monitor
-                current_total_mem=$(get_current_total_gpu_mem)
-                if [[ "$current_total_mem" =~ ^[0-9]+$ ]]; then
-                    echo "$elapsed_seconds,$current_total_mem" >>"$CSV_FILE"
+                gpu_mem_output=$(get_current_gpu_mem)
+                if [[ "$gpu_mem_output" =~ ^[0-9,]+$ ]]; then
+                    echo "$elapsed_seconds,$gpu_mem_output" >>"$CSV_FILE"
+                    current_total_mem=$(echo "$gpu_mem_output" | awk -F',' '{print $NF}')
                     if ((current_total_mem > max_total_memory_mib)); then max_total_memory_mib=$current_total_mem; fi
                     sum_total_memory_mib=$((sum_total_memory_mib + current_total_mem))
                     measurement_count=$((measurement_count + 1))
