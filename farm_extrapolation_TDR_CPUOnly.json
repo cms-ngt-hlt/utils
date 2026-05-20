@@ -1,0 +1,106 @@
+{
+  "params": {
+    "lambda_khz": 500.0,
+    "T0": 32.2,
+    "H0": 1679.0,
+    "C0": 8000.0,
+    "g": 0.2,
+    "budget1": 11400000.0,
+    "budget2": 4600000.0,
+    "years_after": 4.0,
+    "Hgpu0": 1260.0,
+    "Cgpu": 1600.0,
+    "f1": 0.0,
+    "f2": 0.0,
+    "epsilon": 1.0,
+    "start_date": null,
+    "delta_years": 8.0,
+    "lambda2_khz": 750.0,
+    "T0_phase2": 13.4,
+    "H0_phase2": 1679.0,
+    "alpha2_over_alpha1": null,
+    "complexity2": null,
+    "age_cpu_per_year": 1.0,
+    "age_gpu_per_year": 1.0,
+    "chi_old": 1.0,
+    "eta_old": 1.0,
+    "eta_new": 1.0,
+    "Cref_cpu": null
+  },
+  "alpha2_mode": "same",
+  "result": {
+    "today": {
+      "alpha1_events_per_HS23": 0.019178082191780823,
+      "required_HS23": 26071428.57142857,
+      "CPU HS23/CHF": 0.209875,
+      "CPU CHF/HS23": 4.7647409172126265,
+      "GPU HS23/CHF": 0.7875,
+      "GPU CHF/HS23": 1.2698412698412698
+    },
+    "phase1": {
+      "alpha1_events_per_HS23": 0.019178082191780823,
+      "required_HS23": 26071428.57142857,
+      "sigma1_cpu_HS23_per_$": 0.9024240844799997,
+      "sigma1_gpu_HS23_per_$": 3.3861058559999986,
+      "sigma1_cpu_$_per_HS23": 1.1081264531810742,
+      "sigma1_gpu_$_per_HS23": 0.2953244944271466,
+      "f1": 0.0,
+      "M1_cpu_star": 11400000.0,
+      "M1_gpu_star": 0.0,
+      "H1_cpu_HS23": 10287634.563071996,
+      "H1_gpu_HS23": 0.0,
+      "H1_total_HS23": 10287634.563071996,
+      "TP1_Farm_events_per_s": 197297.10120959993,
+      "s_req_t1": 2.5342490940544615
+    },
+    "phase2": {
+      "general": {
+        "alpha2_events_per_HS23": 0.00798094103633115,
+        "required_HS23": 93973880.59701492,
+        "sigma2_cpu_HS23_per_$": 1.8712665815777272,
+        "sigma2_gpu_HS23_per_$": 7.021429103001597,
+        "sigma2_cpu_$_per_HS23": 0.534397402189947,
+        "sigma2_gpu_$_per_HS23": 0.1424211489328446,
+        "f2": 0.0
+      },
+      "aging_phase1_report_only": {
+        "H1_cpu_eff_HS23": 10287634.563071996,
+        "H1_gpu_eff_HS23": 0.0,
+        "chi_old": 1.0,
+        "eta_old": 1.0,
+        "age_gpu_per_year": 1.0,
+        "age_cpu_per_year": 1.0,
+        "note": "Aged Run-4 is IGNORED in t2 optimization per latest hypothesis."
+      },
+      "external_rebuy_base": {
+        "H_equiv_cpu_HS23": 10287634.563071996,
+        "H_equiv_gpu_HS23": 0.0,
+        "H_equiv_total_HS23": 10287634.563071996,
+        "M_equiv_total_$": 5497685.185185186,
+        "M_equiv_cpu_$": 5497685.185185186,
+        "M_equiv_gpu_$": 0.0,
+        "eta_new": 1.0,
+        "note": "This capacity is INCLUDED at t2; cost is external and does not reduce M2."
+      },
+      "optimal_split": {
+        "M2_cpu_star_$": 4600000.0,
+        "M2_gpu_star_$": 0.0
+      },
+      "TP2_Farm_events_per_s": 150803.5588050124,
+      "s_req_t2": 4.973357432298683,
+      "wrong_models": {
+        "TP2_fixed_events_per_s": 150803.5588050124,
+        "s_fixed": 4.973357432298683,
+        "TP2_naive_events_per_s": 150803.5588050124,
+        "s_naive": 4.973357432298683
+      }
+    },
+    "integers": {
+      "Cref_cpu_$": 8000.0,
+      "N1_cpu": 1425,
+      "N1_gpu": 0,
+      "N2_cpu": 575,
+      "N2_gpu": 0
+    }
+  }
+}

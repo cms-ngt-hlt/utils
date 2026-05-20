@@ -56,14 +56,73 @@ Once the configuration is done, the script can be executed by
 
 ## NGT Farm extrapolations scripts
 
-Two scripts are provided to extrapolate required speedup for the NGT farm:
+Three files cover the farm-extrapolation workflow:
 
-- parametersFromMeasurements_cli is needed to extract, from measurements, the
-  HS23 performance of a GPU.
-- farmExtrapolation_twoPhases: extrapolates the required speedup for the full
-  HLT farm given specific measurements and target scenarios.
+- **`parametersFromMeasurements_cli.py`** — extracts, from timing measurements, the HS23 performance of a GPU and the Amdahl's-law parameters of the HLT workflow.
+- **`farm_extrapolation_lib.py`** — pure-math core shared by the two consumers below (the two-phase HS23 model: optimal CPU/GPU split, external Run-5 re-buy, cross-check comparators, integerized node counts). Standard library only.
+- **`farmExtrapolation_twoPhases.py`** — non-interactive CLI wrapper. Prints the projection as a nested text report or, with `--json`, as a single JSON blob.
+- **`farmExtrapolation_tui.py`** — live interactive Textual TUI built on top of the same library. Edit any input on the left and the result panels (Phase 1 / Phase 2 tables, budget split bars, throughput-vs-λ gauges, σ-curves mini-plot, cross-check speedups, contextual help) re-render on every keystroke.
 
-More details on how to use them can be found at the following [link](https://cms-ngt-hlt.docs.cern.ch/Task311/HS23_Farm_TwoPhase_Derivation_plain/)
+### Running the non-interactive CLI
+
+```bash
+python3 farmExtrapolation_twoPhases.py \
+    --lambda-khz 22 --T0 1200 --H0 850 --C0 2000 --g 0.05 \
+    --budget1 5e6 --budget2 3e6 --years-after 3.5 --delta-years 0 \
+    --f1 0.3 --f2 0.6 --Hgpu0 4000 --Cgpu 8000
+# Add --json for a machine-readable single-blob output.
+```
+
+The CLI has zero non-stdlib dependencies and runs with the system Python.
+
+### Running the live TUI
+
+The TUI needs `textual`, `textual-plotext`, and (only if you use the Ctrl+I PNG export) `cairosvg`. On Debian/Ubuntu the system Python is PEP-668 protected, so install into a project-local virtualenv:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install textual textual-plotext cairosvg
+```
+
+Launch it with the same flags as the CLI (none are required — missing ones fall back to baked-in sensible defaults):
+
+```bash
+.venv/bin/python farmExtrapolation_tui.py \
+    --lambda-khz 22 --T0 1200 --H0 850 --C0 2000 --g 0.05 \
+    --budget1 5e6 --budget2 3e6 --years-after 3.5 \
+    --f1 0.3 --f2 0.6 --Hgpu0 4000 --Cgpu 8000
+```
+
+Or pre-load a previously-saved snapshot:
+
+```bash
+.venv/bin/python farmExtrapolation_tui.py --load farm_extrapolation_<timestamp>.json
+# Explicit --flag overrides on the same command-line still win over the snapshot.
+```
+
+#### Keybindings
+
+| key                   | action                                                  |
+|-----------------------|---------------------------------------------------------|
+| Tab / Shift+Tab       | move focus between inputs                               |
+| Up / Down arrows      | step the focused input by its configured ±step          |
+| `‹` / `›` glyphs      | same, with the mouse                                    |
+| Ctrl+R  (or `r`)      | reset all inputs to defaults                            |
+| Ctrl+S  (or `s`)      | save current params + result to a JSON snapshot         |
+| Ctrl+L  (or `l`)      | load parameters from a saved JSON snapshot              |
+| Ctrl+I  (or `i`)      | export the current view as a high-res PNG (or `.svg`)   |
+| Ctrl+Q  (or `q`)      | quit                                                    |
+
+Plain letters work only when no text input has focus; the Ctrl-combos always work.
+
+#### Contextual help
+
+The Help panel at the bottom of the TUI updates as you move focus:
+
+- Focus an input on the left → explanation of that parameter (with the matching CLI flag noted).
+- Tab into a Phase / cross-check table on the right and ↑/↓ through the rows → explanation of how each derived quantity is computed.
+
+More details on how to use these scripts can be found at the following [link](https://cms-ngt-hlt.docs.cern.ch/Task311/HS23_Farm_TwoPhase_Derivation_plain/)
 
 ## NGT Bread and Butter event display generators
 
