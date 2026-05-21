@@ -56,6 +56,7 @@ from textual.widgets import (
     Static,
 )
 from textual_plotext import PlotextPlot
+from rich.text import Text
 
 from farm_extrapolation_lib import (
     ARG_DEFAULTS,
@@ -63,6 +64,16 @@ from farm_extrapolation_lib import (
     compute,
     sigma_trajectory,
 )
+
+
+# Shared CPU/GPU palette, used by both the Rich-markup widgets (hex form) and
+# the plotext line plot (RGB form, since plotext renders to the terminal's
+# true-color channel rather than going through Rich). matplotlib tab10
+# blue/orange — distinctive without looking neon on a dark terminal.
+CPU_COLOR_HEX = "#1f77b4"
+GPU_COLOR_HEX = "#ff7f0e"
+CPU_COLOR_RGB = (31, 119, 180)
+GPU_COLOR_RGB = (255, 127, 14)
 
 
 # Per-parameter ± step sizes for the buttons and Up/Down keys.
@@ -351,6 +362,16 @@ DERIVED_HELP_PHASE2: dict[str, tuple[str, str]] = {
         "Determined by the α₂ mode: same as α₁, α₁ × ratio, α₁ / complexity, "
         "or T0-phase2 / H0-phase2 when both are set (last takes priority).",
     ),
+    "σ_cpu @t0 (HS23/$)": (
+        "σ_cpu @t0 — CPU HS23 per dollar at the baseline measurement",
+        "Same value as in the Phase 1 panel — H0 / C0 at the instant T0 and "
+        "H0 were measured. Multiplied by growth @t2 to reach σ_cpu @t2.",
+    ),
+    "σ_gpu @t0 (HS23/$)": (
+        "σ_gpu @t0 — GPU HS23-equivalent per dollar at the baseline",
+        "Same value as in the Phase 1 panel — Hgpu0 / Cgpu at the GPU "
+        "measurement instant. Multiplied by growth @t2 to reach σ_gpu @t2.",
+    ),
     "growth @t2 (×)": (
         "growth @t2 — perf/$ multiplier from baseline to t2",
         "(1 + g) ** (Δ + N), where N = 'yrs t1->t2'. Multiplies σ@t0 to "
@@ -364,13 +385,13 @@ DERIVED_HELP_PHASE2: dict[str, tuple[str, str]] = {
         "σ_gpu @t2 — GPU HS23-equivalent per dollar at phase 2",
         "σ_gpu @t0 × growth @t2.",
     ),
-    "M_cpu (of M2)": (
-        "M_cpu (of M2) — optimal CPU spend from M2 ($)",
+    "M_cpu": (
+        "M_cpu — optimal CPU spend from M2 ($)",
         "Optimal CPU portion of the Run-5 budget M2, on top of the external "
-        "Run-4-equivalent re-buy. Doesn't include M_rebuy.",
+        "Run-4-equivalent re-buy. Does NOT include the re-buy cost (M_rebuy).",
     ),
-    "M_gpu (of M2)": (
-        "M_gpu (of M2) — optimal GPU spend from M2 ($)",
+    "M_gpu": (
+        "M_gpu — optimal GPU spend from M2 ($)",
         "Remainder of M2 allocated to GPUs at phase 2.",
     ),
     "M_rebuy (extra)": (
@@ -378,18 +399,24 @@ DERIVED_HELP_PHASE2: dict[str, tuple[str, str]] = {
         "Cost to externally re-acquire a Run-4-sized HS23 farm at t2 prices "
         "with split f2. Reported separately — NOT subtracted from M2.",
     ),
+    "H_total (HS23)": (
+        "H_total — total HS23 capacity at phase 2",
+        "H1_total (re-bought Run-4-equivalent) + new HS23 bought with M2 "
+        "(σ_cpu @t2 × M_cpu + η_new × σ_gpu @t2 × M_gpu). Comparable with "
+        "the Phase 1 H_total row.",
+    ),
     "throughput @t2": (
         "throughput @t2 — farm event rate at phase 2 (events/s)",
         "ε × α₂ × (balanced new throughput + H1_total). Compare to λ2.",
     ),
     "N_cpu": (
         "N_cpu — integer CPU node count (phase 2)",
-        "floor(M_cpu_of_M2 / Cref_cpu). Phase-2-only count, excluding "
+        "floor(M_cpu / Cref_cpu). Phase-2-only count, excluding "
         "the re-buy nodes.",
     ),
     "N_gpu": (
         "N_gpu — integer GPU count (phase 2)",
-        "floor(M_gpu_of_M2 / Cgpu). Phase-2-only count.",
+        "floor(M_gpu / Cgpu). Phase-2-only count.",
     ),
     "speedup needed @t2": (
         "speedup needed @t2 — gap between λ2 and TP at phase 2",
@@ -456,6 +483,30 @@ def fmt_value(x: Any) -> str:
     if isinstance(x, float):
         return f"{x:g}"
     return str(x)
+
+
+def fmt_speedup(factor: float) -> Text:
+    """Bold, color-coded speedup factor for the 'speedup needed' row.
+
+    Green at ×1.00 (farm meets λ), graded through yellow to deep red at ≥×3.
+    """
+    f = max(1.0, float(factor))
+    if f >= 3.0:
+        r, g, b = 180, 0, 0
+    else:
+        # Interpolate green → yellow → red on the [1, 3] range.
+        t = (f - 1.0) / 2.0  # 0..1
+        if t <= 0.5:
+            tt = t * 2.0  # 0..1: green -> yellow
+            r = int(200 * tt)
+            g = 180
+            b = 0
+        else:
+            tt = (t - 0.5) * 2.0  # 0..1: yellow -> red
+            r = 200
+            g = int(180 * (1.0 - tt))
+            b = 0
+    return Text(f"×{factor:.2f}", style=f"bold rgb({r},{g},{b})")
 
 
 # --------------------------------------------------------------------- #
@@ -999,6 +1050,9 @@ class FarmTUI(App):
         except Exception:
             self._show_help_for(None)
             return
+        if not label:
+            self._show_help_for(None)
+            return
         title, body = helpdict.get(
             label,
             (label, "(no help text registered for this row)"),
@@ -1074,29 +1128,48 @@ class FarmTUI(App):
             ("σ_gpu @t1 (HS23/$)", f"{p1['sigma1_gpu_HS23_per_$']:.3g}"),
             ("M_cpu", fmt_money(p1["M1_cpu_star"])),
             ("M_gpu", fmt_money(p1["M1_gpu_star"])),
+            # Blank spacer to align the rows below with Phase 2's M_rebuy row.
+            ("", ""),
             ("H_total (HS23)", f"{p1['H1_total_HS23']:.3g}"),
             ("throughput @t1", fmt_rate(p1["TP1_Farm_events_per_s"])),
             ("N_cpu", f"{ints['N1_cpu']:,}"),
             ("N_gpu", f"{ints['N1_gpu']:,}"),
-            ("speedup needed @t1", f"×{p1['s_req_t1']:.2f}"),
+            ("speedup needed @t1", fmt_speedup(p1["s_req_t1"])),
         ]:
             t1.add_row(k, v)
 
         # --- Phase 2 table --- #
+        # Row order mirrors the Phase 1 table so the two panels read as
+        # parallel columns: alpha → σ@t0 → growth → σ@phase → money
+        # (with the P2-only M_rebuy slotted right after the M_cpu/M_gpu pair)
+        # → H_total → throughput → counts → speedup.
+        sigma2_cpu_v = p2["general"]["sigma2_cpu_HS23_per_$"]
+        sigma2_gpu_v = p2["general"]["sigma2_gpu_HS23_per_$"]
+        M2_cpu_v = p2["optimal_split"]["M2_cpu_star_$"]
+        M2_gpu_v = p2["optimal_split"]["M2_gpu_star_$"]
+        # Total HS23 at t2 = re-bought Run-4-equivalent (= H1_total) + new
+        # capacity bought with M2 (CPU spend at σ_cpu, GPU spend discounted by
+        # eta_new). Mirrors how Phase 1 reports H_total = H_cpu + H_gpu.
+        H2_new = sigma2_cpu_v * M2_cpu_v + ns.eta_new * sigma2_gpu_v * M2_gpu_v
+        H2_total = p1["H1_total_HS23"] + H2_new
+
         t2 = self.query_one("#phase2-table", DataTable)
         t2.clear()
         for k, v in [
             ("alpha", f"{p2['general']['alpha2_events_per_HS23']:.3g}"),
+            ("σ_cpu @t0 (HS23/$)", f"{sigma0_cpu:.3g}"),
+            ("σ_gpu @t0 (HS23/$)", f"{sigma0_gpu:.3g}"),
             ("growth @t2 (×)", f"×{growth2:.3f}"),
-            ("σ_cpu @t2 (HS23/$)", f"{p2['general']['sigma2_cpu_HS23_per_$']:.3g}"),
-            ("σ_gpu @t2 (HS23/$)", f"{p2['general']['sigma2_gpu_HS23_per_$']:.3g}"),
-            ("M_cpu (of M2)", fmt_money(p2["optimal_split"]["M2_cpu_star_$"])),
-            ("M_gpu (of M2)", fmt_money(p2["optimal_split"]["M2_gpu_star_$"])),
+            ("σ_cpu @t2 (HS23/$)", f"{sigma2_cpu_v:.3g}"),
+            ("σ_gpu @t2 (HS23/$)", f"{sigma2_gpu_v:.3g}"),
+            ("M_cpu", fmt_money(M2_cpu_v)),
+            ("M_gpu", fmt_money(M2_gpu_v)),
             ("M_rebuy (extra)", fmt_money(p2["external_rebuy_base"]["M_equiv_total_$"])),
+            ("H_total (HS23)", f"{H2_total:.3g}"),
             ("throughput @t2", fmt_rate(p2["TP2_Farm_events_per_s"])),
             ("N_cpu", f"{ints['N2_cpu']:,}"),
             ("N_gpu", f"{ints['N2_gpu']:,}"),
-            ("speedup needed @t2", f"×{p2['s_req_t2']:.2f}"),
+            ("speedup needed @t2", fmt_speedup(p2["s_req_t2"])),
         ]:
             t2.add_row(k, v)
 
@@ -1119,9 +1192,9 @@ class FarmTUI(App):
             ts = [t for (t, _, _) in traj]
             ss_cpu = [c for (_, c, _) in traj]
             ss_gpu = [g for (_, _, g) in traj]
-            plot.plt.plot(ts, ss_cpu, label="σ_cpu", color="cyan")
+            plot.plt.plot(ts, ss_cpu, label="σ_cpu", color=CPU_COLOR_RGB)
             if any(v > 0 for v in ss_gpu):
-                plot.plt.plot(ts, ss_gpu, label="σ_gpu", color="magenta")
+                plot.plt.plot(ts, ss_gpu, label="σ_gpu", color=GPU_COLOR_RGB)
             # Reference markers for the two evaluation points.
             try:
                 plot.plt.vline(ns.delta_years, color="white")
@@ -1163,8 +1236,8 @@ class FarmTUI(App):
         n_cpu = round(width * cpu / total)
         n_gpu = width - n_cpu
         return (
-            f"[cyan]{'█' * n_cpu}[/cyan]"
-            f"[magenta]{'█' * n_gpu}[/magenta]"
+            f"[{CPU_COLOR_HEX}]{'█' * n_cpu}[/{CPU_COLOR_HEX}]"
+            f"[{GPU_COLOR_HEX}]{'█' * n_gpu}[/{GPU_COLOR_HEX}]"
         )
 
     def _render_budget_bars(self, p1: dict, p2: dict) -> str:
@@ -1174,11 +1247,11 @@ class FarmTUI(App):
         p2g = p2["optimal_split"]["M2_gpu_star_$"]
         lines = [
             f"[bold]P1[/bold]  {self._stacked_bar(p1c, p1g)}  "
-            f"[cyan]CPU {fmt_money(p1c)}[/cyan]  "
-            f"[magenta]GPU {fmt_money(p1g)}[/magenta]",
+            f"[{CPU_COLOR_HEX}]CPU {fmt_money(p1c)}[/{CPU_COLOR_HEX}]  "
+            f"[{GPU_COLOR_HEX}]GPU {fmt_money(p1g)}[/{GPU_COLOR_HEX}]",
             f"[bold]P2[/bold]  {self._stacked_bar(p2c, p2g)}  "
-            f"[cyan]CPU {fmt_money(p2c)}[/cyan]  "
-            f"[magenta]GPU {fmt_money(p2g)}[/magenta]",
+            f"[{CPU_COLOR_HEX}]CPU {fmt_money(p2c)}[/{CPU_COLOR_HEX}]  "
+            f"[{GPU_COLOR_HEX}]GPU {fmt_money(p2g)}[/{GPU_COLOR_HEX}]",
             "",
             "[dim]Phase-2 bar shows the optimal split of M2 only — the external "
             "re-buy is reported as M_rebuy in the table.[/dim]",
