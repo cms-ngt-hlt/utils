@@ -5,15 +5,24 @@
 # ---------------------------------------
 GPU_LIST="all"
 
+# Default configuration to test is 'gpu_config.py'.
+# The configurations correspond to python config files named NAME_config.py
+hlt_config_names=("gpu")
+
+# Parse command-line arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
     --gpus)
         GPU_LIST="$2"
         shift 2
         ;;
+    --configs)
+        IFS=',' read -ra hlt_config_names <<< "$2"
+        shift 2
+        ;;
     -h | --help)
-        echo "Usage: $0 [--gpus <comma-separated GPU IDs>]"
-        echo "  Example: $0 --gpus 0,1"
+        echo "Usage: $0 [--gpus <comma-separated GPU IDs>] [--configs <comma-separated config names>]"
+        echo "  Example: $0 --gpus 0,1 --configs ext,alpaka"
         exit 0
         ;;
     *)
@@ -40,9 +49,6 @@ if [[ "$GPU_LIST" == "all" ]]; then
 else
     GPU_TAG="gpu${GPU_LIST//,/}" # e.g. "gpu01" or "gpu23"
 fi
-
-#Add configurations to test. These correspond to python config files named NAME_config.py
-hlt_config_names=("ext" "alpaka")
 
 # Add presets here as needed following the "jobs,threads,streams" format
 jobs_threads_streams_presets=(
