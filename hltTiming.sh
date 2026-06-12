@@ -52,9 +52,9 @@ jobs_threads_streams_presets=(
 )
 
 # Monitoring Configuration
-ENABLE_RESOURCES_MONITORING=true   # Set to 'false' to disable hardware resources checks
-MONITOR_INTERVAL=1           # Check resources every X seconds
-USE_FLOATING_POINT_MEAN=true # Use 'bc' for a more precise mean; falls back to integer if 'bc' not found
+ENABLE_RESOURCES_MONITORING=true # Set to 'false' to disable hardware resources checks
+MONITOR_INTERVAL=1               # Check resources every X seconds
+USE_FLOATING_POINT_MEAN=true     # Use 'bc' for a more precise mean; falls back to integer if 'bc' not found
 
 # Check prerequisites for Monitoring
 if [[ "$ENABLE_RESOURCES_MONITORING" = true ]]; then
@@ -137,15 +137,17 @@ for config_name in "${hlt_config_names[@]}"; do
         fi
 
         # Create jobReport for accurate input measurements
-        if [ ! -f "jobReport.xml" ]; then
-            echo "Creating jobReport.xml for accurate input measurements"
-            cp "$cfg" tmp_cfg.py
-            cat <<@EOF >>tmp_cfg.py
+        if [ -f "jobReport.xml" ]; then
+            rm jobReport.xml
+        fi
+
+        echo "Creating jobReport.xml for accurate input measurements"
+        cp "$cfg" tmp_cfg.py
+        cat <<@EOF >>tmp_cfg.py
 process.maxEvents.input = cms.untracked.int32(10)
 @EOF
-            cmsRun -j jobReport.xml tmp_cfg.py >report.log 2>&1 && rm tmp_cfg.py
-            echo "jobReport.xml created successfully." && rm report.log
-        fi
+        cmsRun -j jobReport.xml tmp_cfg.py >report.log 2>&1 && rm tmp_cfg.py
+        echo "jobReport.xml created successfully." && rm report.log
 
         # Run the benchmark
         if [[ "$ENABLE_RESOURCES_MONITORING" = true ]]; then
