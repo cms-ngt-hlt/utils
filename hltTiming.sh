@@ -17,7 +17,7 @@ while [[ $# -gt 0 ]]; do
         shift 2
         ;;
     --configs)
-        IFS=',' read -ra hlt_config_names <<< "$2"
+        IFS=',' read -ra hlt_config_names <<<"$2"
         shift 2
         ;;
     -h | --help)
@@ -76,14 +76,25 @@ if [[ "$ENABLE_RESOURCES_MONITORING" = true ]]; then
         USE_FLOATING_POINT_MEAN=false
     fi
 
-    # Function to get current GPU memory usage, per gpu, comma-separated, and total
-    get_current_gpu_mem() {
-        nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | awk '{ printf "%s,", $1; total += $1 } END { print total }' || echo "error"
+    # Single nvidia-smi call gathering both volatile utilization (%) and used
+    # memory (MiB) at once. Returns one line per GPU: "<utilization>, <memory>".
+    get_gpu_sample() {
+        nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv,noheader,nounits 2>/dev/null
     }
 
-    # Function to get current GPU usage, per gpu, comma-separated
-    get_current_gpus_usage() {
-        nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | paste -sd ',' || echo "error"
+    # Compute the mean of <sum>/<count>, honoring USE_FLOATING_POINT_MEAN.
+    # Prints "N/A" when there are no measurements.
+    mean() {
+        local sum=$1 count=$2
+        ((count == 0)) && {
+            echo "N/A"
+            return
+        }
+        if [[ "$USE_FLOATING_POINT_MEAN" = true ]]; then
+            echo "scale=2; $sum / $count" | bc
+        else
+            echo $((sum / count))
+        fi
     }
 
     # Helper function to recursively get all child PIDs
@@ -114,11 +125,6 @@ echo "Starting HLT benchmark for configurations: ${hlt_config_names[@]}"
 echo "With jobs,threads,streams presets: ${jobs_threads_streams_presets[@]}"
 echo "Monitoring is: ${ENABLE_RESOURCES_MONITORING}"
 echo "----------------------------------------------------"
-
-# Arrays to accumulate GPU usage, per GPU
-declare -a totals
-declare -a averages
-declare -a max_usage
 
 for config_name in "${hlt_config_names[@]}"; do
     echo "Configuration: $config_name"
@@ -158,20 +164,37 @@ process.maxEvents.input = cms.untracked.int32(10)
         # Run the benchmark
         if [[ "$ENABLE_RESOURCES_MONITORING" = true ]]; then
             # With monitoring
-            CSV_FILE="${logdir}/gpu_memory_${config_name}_${jobs}j_${threads}t_${streams}s.csv"
-            CSV_GPU_FILE="${logdir}/gpu_usage_${config_name}_${jobs}j_${threads}t_${streams}s.csv"
+            CSV_GPU_FILE="${logdir}/gpu_monitor_${config_name}_${jobs}j_${threads}t_${streams}s.csv"
             CSV_CPU_FILE="${logdir}/cpu_memory_${config_name}_${jobs}j_${threads}t_${streams}s.csv"
             TMP_LOG_FILE="${logdir}/benchmark.tmp.log"
 
-            echo "elapsed_seconds,memory_mib" >"$CSV_FILE"
-            echo "elapsed_seconds,gpus_usage" >"$CSV_GPU_FILE"
+            # Build the combined GPU CSV header dynamically from the GPU count, so
+            # the header always matches the per-GPU data rows. Final two columns are
+            # the totals: total_usage (mean of per-GPU %) and total_memory (sum MiB).
+            num_gpus=$(nvidia-smi --query-gpu=index --format=csv,noheader,nounits | wc -l)
+            gpu_header="elapsed_seconds"
+            for ((g = 0; g < num_gpus; g++)); do
+                gpu_header+=",gpu${g}_usage,gpu${g}_memory"
+            done
+            gpu_header+=",total_usage,total_memory"
+            echo "$gpu_header" >"$CSV_GPU_FILE"
             echo "elapsed_seconds,cpu_memory_mib" >"$CSV_CPU_FILE"
 
-            # Initialize GPU monitoring variables
+            # Note used in the summary describing how means were computed
+            if [[ "$USE_FLOATING_POINT_MEAN" = true ]]; then
+                mean_calculation_note="(float using bc)"
+            else
+                mean_calculation_note="(integer)"
+            fi
+
+            # Initialize GPU monitoring variables (reset for every preset)
+            usage_totals=()
+            usage_max=()
+            mem_totals=()
+            mem_max=()
             max_total_memory_mib=0
             sum_total_memory_mib=0
             measurement_count=0
-            measurement_count_gpu=0
 
             # Initialize CPU monitoring variables
             max_cpu_memory_mib=0
@@ -197,33 +220,36 @@ process.maxEvents.input = cms.untracked.int32(10)
 
             # The monitoring loop checks on the benchmark program
             while ps -p $PROGRAM_PID >/dev/null; do
+                loop_start=$(date +%s.%N)
                 current_time=$(date +%s)
                 elapsed_seconds=$((current_time - START_TIME))
 
-                # GPU Memory Monitor
-                gpu_mem_output=$(get_current_gpu_mem)
-                if [[ "$gpu_mem_output" =~ ^[0-9,]+$ ]]; then
-                    echo "$elapsed_seconds,$gpu_mem_output" >>"$CSV_FILE"
-                    current_total_mem=$(echo "$gpu_mem_output" | awk -F',' '{print $NF}')
-                    if ((current_total_mem > max_total_memory_mib)); then max_total_memory_mib=$current_total_mem; fi
-                    sum_total_memory_mib=$((sum_total_memory_mib + current_total_mem))
-                    measurement_count=$((measurement_count + 1))
-                fi
+                # GPU Monitor: a single nvidia-smi call gathers utilization + memory.
+                gpu_sample=$(get_gpu_sample)
+                if [[ -n "$gpu_sample" ]]; then
+                    # Build the interleaved CSV row plus the two totals:
+                    # gpu0_usage,gpu0_memory,...,total_usage (mean %),total_memory (sum MiB)
+                    gpu_row=$(awk -F',[[:space:]]*' '
+                        { printf "%s,%s,", $1, $2; su += $1; sm += $2; n++ }
+                        END { printf "%.2f,%d", (n ? su / n : 0), sm }' <<<"$gpu_sample")
+                    echo "$elapsed_seconds,$gpu_row" >>"$CSV_GPU_FILE"
 
-                # GPU Usage Monitor
-                current_gpus_usage=$(get_current_gpus_usage)
-                if [[ "$current_gpus_usage" =~ ^[0-9,]+$ ]]; then
-                    echo "$elapsed_seconds,$current_gpus_usage" >>"$CSV_GPU_FILE"
-                    measurement_count_gpu=$((measurement_count_gpu + 1))
-                    # Update running totals and maximums
-                    IFS=',' read -ra values <<<"$current_gpus_usage"
-                    for i in "${!values[@]}"; do
-                        totals[$i]=$((${totals[$i]:-0} + values[$i]))
-                        # Track maximum
-                        if ((values[$i] > ${max_usage[$i]:-0})); then
-                            max_usage[$i]=${values[$i]}
-                        fi
-                    done
+                    # Accumulate per-GPU and total statistics for the summary.
+                    g=0
+                    sample_total_mem=0
+                    while IFS=',' read -r usage memory; do
+                        usage=${usage//[[:space:]]/}
+                        memory=${memory//[[:space:]]/}
+                        usage_totals[$g]=$((${usage_totals[$g]:-0} + usage))
+                        if ((usage > ${usage_max[$g]:-0})); then usage_max[$g]=$usage; fi
+                        mem_totals[$g]=$((${mem_totals[$g]:-0} + memory))
+                        if ((memory > ${mem_max[$g]:-0})); then mem_max[$g]=$memory; fi
+                        sample_total_mem=$((sample_total_mem + memory))
+                        g=$((g + 1))
+                    done <<<"$gpu_sample"
+                    if ((sample_total_mem > max_total_memory_mib)); then max_total_memory_mib=$sample_total_mem; fi
+                    sum_total_memory_mib=$((sum_total_memory_mib + sample_total_mem))
+                    measurement_count=$((measurement_count + 1))
                 fi
 
                 # CPU Memory Monitor
@@ -235,7 +261,14 @@ process.maxEvents.input = cms.untracked.int32(10)
                     measurement_count_cpu=$((measurement_count_cpu + 1))
                 fi
 
-                sleep $MONITOR_INTERVAL
+                # Sleep to the next tick, subtracting the time spent sampling so the
+                # cadence stays close to MONITOR_INTERVAL (needs bc for sub-second math).
+                if command -v bc &>/dev/null; then
+                    sleep_for=$(echo "d=$MONITOR_INTERVAL-($(date +%s.%N)-$loop_start); if (d<0) d=0; d" | bc)
+                    sleep "$sleep_for"
+                else
+                    sleep "$MONITOR_INTERVAL"
+                fi
             done
 
             # The benchmark has finished, so we can stop the 'tail' process
@@ -247,36 +280,17 @@ process.maxEvents.input = cms.untracked.int32(10)
             # Rename the temporary log to the final log file
             mv "$TMP_LOG_FILE" "${logdir}/output.log"
 
-            # Calculate GPU Means
-            mean_total_memory_mib="N/A"
-            if ((measurement_count > 0)); then
-                if [[ "$USE_FLOATING_POINT_MEAN" = true ]]; then
-                    mean_total_memory_mib=$(echo "scale=2; $sum_total_memory_mib / $measurement_count" | bc)
-                    mean_calculation_note="(float using bc)"
-                else
-                    mean_total_memory_mib=$((sum_total_memory_mib / measurement_count))
-                    mean_calculation_note="(integer)"
-                fi
-            fi
-            if ((measurement_count_gpu > 0)); then
-                for i in "${!totals[@]}"; do
-                    if [[ "$USE_FLOATING_POINT_MEAN" = true ]]; then
-                        averages[$i]=$(echo "scale=2; ${totals[$i]} / $measurement_count_gpu" | bc)
-                    else
-                        averages[$i]=$((totals[$i] / measurement_count_gpu))
-                    fi
-                done
-            fi
+            # Calculate GPU Means (per-GPU utilization and memory, plus the total)
+            mean_total_memory_mib=$(mean "$sum_total_memory_mib" "$measurement_count")
+            usage_avg=()
+            mem_avg=()
+            for i in "${!usage_totals[@]}"; do
+                usage_avg[$i]=$(mean "${usage_totals[$i]}" "$measurement_count")
+                mem_avg[$i]=$(mean "${mem_totals[$i]}" "$measurement_count")
+            done
 
             # Calculate CPU Means
-            mean_cpu_memory_mib="N/A"
-            if ((measurement_count_cpu > 0)); then
-                if [[ "$USE_FLOATING_POINT_MEAN" = true ]]; then
-                    mean_cpu_memory_mib=$(echo "scale=2; $sum_cpu_memory_mib / $measurement_count_cpu" | bc)
-                else
-                    mean_cpu_memory_mib=$((sum_cpu_memory_mib / measurement_count_cpu))
-                fi
-            fi
+            mean_cpu_memory_mib=$(mean "$sum_cpu_memory_mib" "$measurement_count_cpu")
 
             # Append monitoring results to the log file and print to console
             tee -a "${logdir}/output.log" <<EOF
@@ -294,12 +308,15 @@ Data cpu-memory points saved to: '$CSV_CPU_FILE'
 --- GPU Memory & Usage ---
 Peak Total GPU Memory Usage: $max_total_memory_mib MiB
 Mean Total GPU Memory Usage: $mean_total_memory_mib MiB $mean_calculation_note
-Data gpu-memory points saved to: '$CSV_FILE'
-Data gpu-usage  points saved to: '$CSV_GPU_FILE'
+Data gpu-monitor points saved to: '$CSV_GPU_FILE'
 
-Per-GPU Mean GPU Utilization:
-$(for i in "${!averages[@]}"; do
-                printf "  GPU-%d: %s%% (mean), %s%% (max)\n" "$i" "${averages[$i]}" "${max_usage[$i]}"
+Per-GPU GPU Utilization:
+$(for i in "${!usage_avg[@]}"; do
+                printf "  GPU-%d: %s%% (mean), %s%% (max)\n" "$i" "${usage_avg[$i]}" "${usage_max[$i]}"
+            done)
+Per-GPU GPU Memory:
+$(for i in "${!mem_avg[@]}"; do
+                printf "  GPU-%d: %s MiB (mean), %s MiB (max)\n" "$i" "${mem_avg[$i]}" "${mem_max[$i]}"
             done)
 -------------------------------------
 EOF
