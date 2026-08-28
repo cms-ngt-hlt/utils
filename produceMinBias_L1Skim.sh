@@ -1,5 +1,39 @@
-#!/bin/bash -ex                                                                                                                                                                                             
+#!/bin/bash -ex
 LOCALPATH='/eos/cms/store/relval/CMSSW_20_0_0_pre1/RelValMinBias_14TeV/GEN-SIM-DIGI-RAW/PU_150X_mcRun4_realistic_v1_STD_D121_RegeneratedGS_PU-v1/2590000/'
+
+# Filter mode: which module decides the L1 skim accept/reject.
+#   pathstatus -> process.L1skimFilter = PathStatusFilter (logicalExpression over l_pathname) (TIMING MENU)
+#   l1gt       -> process.L1skimFilter = L1GTAcceptFilter (algoBlocksTag/decision) (NGT MENU)
+# Select at runtime with -f, or via env var FILTER_MODE. Defaults to l1gt.
+#
+# run with: /rerunL1_skim.sh -f pathstatus or ./rerunL1_skim.sh -f l1gt
+#
+
+FILTER_MODE="${FILTER_MODE:-l1gt}"
+
+while getopts "f:h" opt; do
+    case "${opt}" in
+        f) FILTER_MODE="${OPTARG}" ;;
+        h)
+            echo "Usage: $0 [-f pathstatus|l1gt]"
+            exit 0
+            ;;
+        *)
+            echo "Usage: $0 [-f pathstatus|l1gt]" >&2
+            exit 1
+            ;;
+    esac
+done
+
+case "${FILTER_MODE}" in
+    pathstatus|l1gt) ;;
+    *)
+        echo "Invalid -f value '${FILTER_MODE}': must be 'pathstatus' or 'l1gt'" >&2
+        exit 1
+        ;;
+esac
+
+echo "L1 skim filter mode: ${FILTER_MODE}"
 
 # Read all files into a bash array
 mapfile -t FILES < <(find "${LOCALPATH}" -maxdepth 1 -type f | sort)
@@ -15,7 +49,7 @@ echo "Found ${NFILES} input files"
 for ((i=0; i<NFILES; i+=CHUNK)); do
 
     CFG=$(printf "rerunL1_chunk_%03d_cfg.py" $((i/CHUNK)))
-    OUT=$(printf "output_chunk_%03d.root" $((i/CHUNK)))
+    OUT=$(printf "output_chunk_%03d_%s.root" $((i/CHUNK)) "${FILTER_MODE}")
 
     # Build the comma-separated file list
     FILELIST=""
@@ -196,14 +230,27 @@ for pathname in l_pathname :
     else :
         logExpStr += f" or {pathname}"
 
-#process.L1skimFilter = cms.EDFilter("PathStatusFilter",
-#    logicalExpression = cms.string(logExpStr)
-#)
+EOF
 
+    # Filter selection is decided at bash level (\${FILTER_MODE}) rather than
+    # hardcoded in the generated python config, so the two implementations
+    # never both land in the same _cfg.py file.
+    if [ "${FILTER_MODE}" == "pathstatus" ]; then
+        cat <<EOF >> "${CFG}"
+process.L1skimFilter = cms.EDFilter("PathStatusFilter",
+    logicalExpression = cms.string(logExpStr)
+)
+EOF
+    else
+        cat <<EOF >> "${CFG}"
 process.L1skimFilter = cms.EDFilter("L1GTAcceptFilter",
 			            algoBlocksTag = cms.InputTag("l1tGTAlgoBlockProducer"),
                         	    decision = cms.string("final")                                    
                                    )
+EOF
+    fi
+
+    cat <<EOF >> "${CFG}"
 
 process.L1skimPath = cms.Path(process.L1skimFilter)
 l_path.append(process.L1skimPath)
